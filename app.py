@@ -80,7 +80,7 @@ st.write("Upload an image or PDF and extract text in your preferred language.")
 st.sidebar.header("🌐 Language Settings")
 lang_choice = st.sidebar.selectbox(
     "Select OCR Language",
-    options=["English", "Hindi", "Multilingual (Auto-detect)", "French", "Spanish"],
+    options=["English", "Hindi", "French", "Spanish"],
     index=0
 )
 
@@ -88,7 +88,6 @@ lang_choice = st.sidebar.selectbox(
 lang_map = {
     "English": "en",
     "Hindi": "hi",
-    "Multilingual (Auto-detect)": "multilang",
     "French": "fr",
     "Spanish": "es"
 }
@@ -140,9 +139,7 @@ if uploaded_file:
             pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             img_np = np.array(img)
-
             result = ocr.ocr(img_np)
-
             for page_data in result:
                 if isinstance(page_data, dict) and "rec_texts" in page_data:
                     all_text += "\n".join(page_data["rec_texts"]) + "\n"
@@ -151,7 +148,13 @@ if uploaded_file:
                         if len(line) > 1:
                             all_text += str(line[1][0]) + "\n"
 
-            st.image(img, caption=f"📃 Page {i+1}", use_container_width=True)
+            
+            st.title("Checkbox Controlled Visibility")
+            show_details = st.checkbox("Show Details")
+            if show_details:
+                st.write("Here are some details.")
+                st.button("Action Button")
+                st.image(img, caption=f"📃 Page {i+1}", use_container_width=True)
 
     # ---------- OUTPUT ----------
     st.success(f"✅ Text extraction complete ({lang_choice})!")
@@ -167,4 +170,5 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
+
 

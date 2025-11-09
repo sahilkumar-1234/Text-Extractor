@@ -296,6 +296,7 @@ from paddleocr import PaddleOCR
 from PIL import Image
 import numpy as np
 import fitz  # PyMuPDF
+import io
 
 # ---------------- Streamlit Page Setup ----------------
 st.set_page_config(
@@ -414,6 +415,7 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
+
 
 
 

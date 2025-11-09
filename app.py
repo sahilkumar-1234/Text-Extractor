@@ -268,6 +268,27 @@
 #                 for line in page_data:
 #                     if len(line) > 1:
 #                         page_text += str(line[1][0]) + "\n"
+#     # Append current page’s text to all_text
+#         all_text += page_text + "\n"
+
+#             # Optional: show image preview
+#             if show_images:
+#                 st.image(img, caption=f"📃 Page {i+1}", use_container_width=True)
+
+#     # ---------- OUTPUT ----------
+#     st.success(f"✅ Text extraction complete ({lang_choice})!")
+#     st.text_area("📝 Extracted Text", all_text.strip(), height=400)
+
+#     st.download_button(
+#         label="💾 Download Extracted Text",
+#         data=all_text.strip(),
+#         file_name=f"extracted_text_{selected_lang}.txt",
+#         mime="text/plain"
+#     )
+
+# else:
+#     st.info("Please upload an image or PDF to start extraction.")
+
 
 #_________________________________________________________________________________________
 import streamlit as st
@@ -371,30 +392,6 @@ if uploaded_file:
             # Optional: show image preview
             if show_images:
                 st.image(img, caption=f"📃 Page {i}", use_container_width=True)
-
-    # ---------- OUTPUT ----------
-    st.success(f"✅ Text extraction complete ({lang_choice})!")
-    st.text_area("📝 Extracted Text", all_text.strip(), height=400)
-
-    st.download_button(
-        label="💾 Download Extracted Text",
-        data=all_text.strip(),
-        file_name=f"extracted_text_{selected_lang}.txt",
-        mime="text/plain"
-    )
-
-else:
-    st.info("Please upload an image or PDF to start extraction.")
-
-
-
-
-        # Append current page’s text to all_text
-        all_text += page_text + "\n"
-
-            # Optional: show image preview
-            if show_images:
-                st.image(img, caption=f"📃 Page {i+1}", use_container_width=True)
 
     # ---------- OUTPUT ----------
     st.success(f"✅ Text extraction complete ({lang_choice})!")

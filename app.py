@@ -194,6 +194,9 @@ if uploaded_file:
                 for line in item:
                     if len(line) > 1:
                         all_text += line[1][0] + "\n"
+                        
+        st.success(f"✅ Text extraction complete ({lang_choice})!")
+        st.text_area("📝 Extracted Text", all_text.strip(), height=400, key="extracted_text_box")
 
     # ---------- PDF ----------
     elif uploaded_file.type == "application/pdf":
@@ -260,3 +263,4 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
+

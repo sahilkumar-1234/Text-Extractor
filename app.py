@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import fitz  # PyMuPDF
 import io
+import streamlit.components.v1 as components
 
 # ---------------- Streamlit Page Setup ----------------
 st.set_page_config(
@@ -79,18 +80,14 @@ if uploaded_file:
         num_pages = len(pdf_doc)
 
         for i, page in enumerate(pdf_doc, start=1):
-            # Convert page to image
             pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-            # Convert image to bytes (safe for Streamlit rendering)
             img_buffer = io.BytesIO()
             img.save(img_buffer, format="PNG")
             img_bytes = img_buffer.getvalue()
-
             img_np = np.array(img)
 
-            # ✅ Reinitialize OCR per page (prevents runtime crash)
             ocr_local = PaddleOCR(use_angle_cls=True, lang=selected_lang)
 
             with st.spinner(f"🔍 Processing page {i}/{num_pages}..."):
@@ -116,8 +113,33 @@ if uploaded_file:
 
     # ---------- OUTPUT ----------
     st.success(f"✅ Text extraction complete ({lang_choice})!")
-    st.text_area("📝 Extracted Text", all_text.strip(), height=400)
 
+    st.text_area("📝 Extracted Text", all_text.strip(), height=400, key="extracted_text_box")
+
+    # --- Copy Button (JS) ---
+    copy_code = f"""
+        <script>
+        function copyToClipboard() {{
+            var text = `{all_text.strip().replace('`', '\\`')}`;
+            navigator.clipboard.writeText(text);
+            alert("✅ Text copied to clipboard!");
+        }}
+        </script>
+        <button onclick="copyToClipboard()" 
+            style="
+                background-color:#4CAF50;
+                color:white;
+                border:none;
+                padding:8px 16px;
+                border-radius:6px;
+                cursor:pointer;
+                font-size:16px;">
+            📋 Copy Text
+        </button>
+    """
+    components.html(copy_code, height=70)
+
+    # --- Download Button ---
     st.download_button(
         label="💾 Download Extracted Text",
         data=all_text.strip(),
@@ -127,4 +149,3 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
-

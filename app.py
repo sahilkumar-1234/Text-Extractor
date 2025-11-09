@@ -360,6 +360,7 @@ if uploaded_file:
                         all_text += str(line[1][0]) + "\n"
 
     # ---------- PDF HANDLING ----------
+        # ---------- PDF HANDLING ----------
     elif uploaded_file.type == "application/pdf":
         st.info("📄 Extracting text from PDF pages...")
         pdf_bytes = uploaded_file.read()
@@ -370,6 +371,12 @@ if uploaded_file:
         for i, page in enumerate(pdf_doc, start=1):
             pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+            # Save image as bytes (safe for Streamlit rendering)
+            img_buffer = io.BytesIO()
+            img.save(img_buffer, format="PNG")
+            img_bytes = img_buffer.getvalue()
+
             img_np = np.array(img)
 
             with st.spinner(f"🔍 Processing page {i}/{len(pdf_doc)}..."):
@@ -389,9 +396,10 @@ if uploaded_file:
             # Append current page’s text to all_text
             all_text += page_text + "\n"
 
-            # Optional: show image preview
+            # ✅ Safe: show image AFTER OCR memory is released
             if show_images:
-                st.image(img, caption=f"📃 Page {i}", use_container_width=True)
+                st.image(img_bytes, caption=f"📃 Page {i}", use_container_width=True)
+
 
     # ---------- OUTPUT ----------
     st.success(f"✅ Text extraction complete ({lang_choice})!")
@@ -406,6 +414,7 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
+
 
 
 

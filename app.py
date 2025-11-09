@@ -361,53 +361,51 @@ if uploaded_file:
                         all_text += str(line[1][0]) + "\n"
 
     # ---------- PDF HANDLING ----------
+    elif uploaded_file.type == "application/pdf":
+        st.info("📄 Extracting text from PDF pages...")
+        pdf_bytes = uploaded_file.read()
+        pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
-	elif uploaded_file.type == "application/pdf":
-		
-	    st.info("📄 Extracting text from PDF pages...")
-	    pdf_bytes = uploaded_file.read()
-	    pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-	
-	    show_images = st.checkbox("👁️ Show Page Previews")
-	    progress = st.progress(0)
-	
-	    num_pages = len(pdf_doc)
-	
-	    for i, page in enumerate(pdf_doc, start=1):
-	        # Convert page to image
-	        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-	        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-	
-	        # Convert image to bytes (safe for Streamlit rendering)
-	        img_buffer = io.BytesIO()
-	        img.save(img_buffer, format="PNG")
-	        img_bytes = img_buffer.getvalue()
-	
-	        img_np = np.array(img)
-	
-	        # ✅ Reinitialize OCR per page (prevents runtime crash)
-	        ocr_local = PaddleOCR(use_angle_cls=True, lang=selected_lang)
-	
-	        with st.spinner(f"🔍 Processing page {i}/{num_pages}..."):
-	            result = ocr_local.ocr(img_np)
-	
-	        page_text = f"\n📄 ---- Page {i} ----\n"
-	        for page_data in result:
-	            if isinstance(page_data, dict) and "rec_texts" in page_data:
-	                page_text += "\n".join(page_data["rec_texts"]) + "\n"
-	            elif isinstance(page_data, list):
-	                for line in page_data:
-	                    if len(line) > 1:
-	                        page_text += str(line[1][0]) + "\n"
-	
-	        all_text += page_text + "\n"
-	
-	        if show_images:
-	            st.image(img_bytes, caption=f"📃 Page {i}", use_container_width=True)
-	
-	        progress.progress(i / num_pages)
-	
-	    progress.empty()
+        show_images = st.checkbox("👁️ Show Page Previews")
+        progress = st.progress(0)
+
+        num_pages = len(pdf_doc)
+
+        for i, page in enumerate(pdf_doc, start=1):
+            # Convert page to image
+            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+            # Convert image to bytes (safe for Streamlit rendering)
+            img_buffer = io.BytesIO()
+            img.save(img_buffer, format="PNG")
+            img_bytes = img_buffer.getvalue()
+
+            img_np = np.array(img)
+
+            # ✅ Reinitialize OCR per page (prevents runtime crash)
+            ocr_local = PaddleOCR(use_angle_cls=True, lang=selected_lang)
+
+            with st.spinner(f"🔍 Processing page {i}/{num_pages}..."):
+                result = ocr_local.ocr(img_np)
+
+            page_text = f"\n📄 ---- Page {i} ----\n"
+            for page_data in result:
+                if isinstance(page_data, dict) and "rec_texts" in page_data:
+                    page_text += "\n".join(page_data["rec_texts"]) + "\n"
+                elif isinstance(page_data, list):
+                    for line in page_data:
+                        if len(line) > 1:
+                            page_text += str(line[1][0]) + "\n"
+
+            all_text += page_text + "\n"
+
+            if show_images:
+                st.image(img_bytes, caption=f"📃 Page {i}", use_container_width=True)
+
+            progress.progress(i / num_pages)
+
+        progress.empty()
 
     # ---------- OUTPUT ----------
     st.success(f"✅ Text extraction complete ({lang_choice})!")
@@ -422,11 +420,3 @@ if uploaded_file:
 
 else:
     st.info("Please upload an image or PDF to start extraction.")
-
-
-
-
-
-
-
-
